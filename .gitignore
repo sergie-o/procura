@@ -1,0 +1,17 @@
+# Environment variables - never commit this
+.env
+
+# Virtual environment
+procure_env/
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Mac system files
+.DS_Store
+
+# Streamlit local config
+.streamlit/secrets.toml
