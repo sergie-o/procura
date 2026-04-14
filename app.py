@@ -3,8 +3,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
 import anthropic
-from dotenv import load_dotenv
-load_dotenv()
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 # DATA (inlined)
@@ -117,7 +116,6 @@ CURRENCIES = {
     "ZAR - South African Rand": {"code": "ZAR", "symbol": "R",    "rate": 18.5},
 }
 
-
 def fmt(usd_value: float, currency_key: str) -> str:
     c = CURRENCIES[currency_key]
     converted = usd_value * c["rate"]
@@ -129,7 +127,6 @@ def fmt(usd_value: float, currency_key: str) -> str:
         return f"{c['symbol']}{converted:,.0f}"
     else:
         return f"{c['symbol']}{converted:.2f}"
-
 
 SYSTEM_PROMPT = """You are Marcus, a world-class heavy construction equipment expert and senior procurement consultant at PROCURA. You have 25+ years of hands-on experience spanning three distinct areas of deep expertise:
 
@@ -216,12 +213,10 @@ PROJECT CONTEXT:
 
 TONE: Warm, authoritative, mentor-like. Think of yourself as a trusted senior colleague who genuinely wants this project to succeed — not just answering questions but actively guiding the procurement strategy."""
 
-
 def format_currency(value: float) -> str:
     if value >= 1_000_000:
         return f"${value/1_000_000:.2f}M"
     return f"${value:,.0f}"
-
 
 def format_price_comparison(base_price: float, compare_price: float) -> dict:
     diff = compare_price - base_price
@@ -229,13 +224,11 @@ def format_price_comparison(base_price: float, compare_price: float) -> dict:
     return {"difference": diff, "percentage": pct, "is_cheaper": diff < 0,
             "label": f"{'↓' if diff < 0 else '↑'} {abs(pct):.1f}%"}
 
-
 def get_shipping_advice(from_market, to_destination, equipment_list, include_tyres,
-                        tyre_condition, buyer_residency, shipment_method,
-                        special_notes, procurement_country):
+                         tyre_condition, buyer_residency, shipment_method,
+                         special_notes, procurement_country):
     client = anthropic.Anthropic()
-    equipment_str = ", ".join(
-        equipment_list) if equipment_list else "None specified"
+    equipment_str = ", ".join(equipment_list) if equipment_list else "None specified"
     tyre_info = f"10x Truck Tyres ({tyre_condition})" if include_tyres else "No tyres"
     prompt = f"""You are an expert international freight, customs, and construction equipment procurement consultant
 with 20+ years of experience in cross-border heavy machinery logistics, particularly for African markets.
@@ -266,7 +259,6 @@ Be specific. Quantify estimates in USD where possible."""
         messages=[{"role": "user", "content": prompt}],
     )
     return message.content[0].text
-
 
 def get_market_analysis(equipment, condition, markets, price_data, procurement_country, destination):
     client = anthropic.Anthropic()
@@ -302,20 +294,17 @@ def live_market_search(
     min_year, max_year, budget_usd, extra_specs, destination
 ):
     client = anthropic.Anthropic()
-    markets_str = ", ".join(
-        markets) if markets else "European, China, Middle East"
+    markets_str = ", ".join(markets) if markets else "European, China, Middle East"
     spec_lines = []
     if min_power or max_power:
-        spec_lines.append(
-            f"Engine power: {min_power or 'any'}-{max_power or 'any'} HP")
+        spec_lines.append(f"Engine power: {min_power or 'any'}-{max_power or 'any'} HP")
     if min_year or max_year:
         spec_lines.append(f"Year: {min_year or 'any'}-{max_year or 'any'}")
     if budget_usd:
         spec_lines.append(f"Max budget: ${budget_usd} USD")
     if extra_specs:
         spec_lines.append(f"Additional requirements: {extra_specs}")
-    specs_block = "\n".join(
-        spec_lines) if spec_lines else "No additional filters"
+    specs_block = "\n".join(spec_lines) if spec_lines else "No additional filters"
 
     prompt = f"""You are a senior construction equipment procurement specialist. Use web search to find REAL current listings.
 
@@ -361,7 +350,6 @@ Be specific. Use real model names, real prices, real URLs. If no results found f
         if hasattr(block, "type") and block.type == "text":
             result_parts.append(block.text)
     return "\n\n".join(result_parts) if result_parts else "No results returned. Please try again."
-
 
 # ─── Page Config ─────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -571,19 +559,17 @@ st.markdown("""
 <div class="procure-header">
   <div style="display:flex; align-items:center; gap:1.2rem; margin-bottom:0.6rem;">
     <svg width="56" height="56" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
-      <!-- Solid black square mark -->
-      <rect x="0" y="0" width="56" height="56" rx="6" fill="#E8EDF5"/>
+      <!-- Hexagon mark -->
+      <polygon points="28,3 51,16 51,42 28,55 5,42 5,16" fill="#E8573F"/>
+      <!-- Inner hexagon outline -->
+      <polygon points="28,12 43,21 43,37 28,46 13,37 13,21" fill="none" stroke="white" stroke-width="1.4"/>
       <!-- P letterform -->
-      <text x="13" y="40" font-family="sans-serif" font-size="34" font-weight="700" fill="#0A0E1A">P</text>
-      <!-- Red arrow cutting through -->
-      <line x1="10" y1="38" x2="42" y2="38" stroke="#E8573F" stroke-width="3.5" stroke-linecap="round"/>
-      <polygon points="42,38 36,34 36,42" fill="#E8573F"/>
+      <line x1="22" y1="21" x2="22" y2="37" stroke="white" stroke-width="2.8" stroke-linecap="round"/>
+      <path d="M22 21 Q33 21 33 27 Q33 33 22 33" fill="none" stroke="white" stroke-width="2.8" stroke-linecap="round"/>
     </svg>
     <div>
-      <div style="font-size:2rem; font-weight:700; color:#E8EDF5; margin:0; letter-spacing:2px; font-family:'Space Grotesk',sans-serif;">PROCURA</div>
-      <!-- Red underline accent under PROCURA -->
-      <div style="height:2px; width:140px; background:#E8573F; margin:3px 0 4px 0;"></div>
-      <div style="color:#8A9BB5; font-size:0.72rem; margin:0; letter-spacing:3px; font-family:'Space Grotesk',sans-serif;">EQUIPMENT &middot; LOGISTICS</div>
+      <div style="font-size:2rem; font-weight:700; color:#F5A623; margin:0; letter-spacing:2px; font-family:'Space Grotesk',sans-serif;">PROCURA</div>
+      <div style="color:#8A9BB5; font-size:0.72rem; margin:2px 0 0 0; letter-spacing:3px; font-family:'Space Grotesk',sans-serif;">GLOBAL PROCUREMENT</div>
     </div>
   </div>
   <p style="color:#6A8AAA; font-size:0.88rem; margin:0;">Cross-Market Equipment Intelligence &nbsp;·&nbsp; Price Comparison &nbsp;·&nbsp; AI-Powered Shipping Advisory</p>
@@ -621,8 +607,7 @@ with st.sidebar:
     selected_markets = st.multiselect(
         "Select markets",
         list(MARKETS.keys()),
-        default=[
-            "European Market (EU)", "Alibaba / Chinese Market", "Middle East (UAE/Dubai)"],
+        default=["European Market (EU)", "Alibaba / Chinese Market", "Middle East (UAE/Dubai)"],
         label_visibility="collapsed"
     )
 
@@ -653,8 +638,7 @@ with st.sidebar:
     """, unsafe_allow_html=True)
 
     st.markdown("---")
-    st.markdown("<p style='color:#3A5A7A; font-size:0.75rem;'>PROCURA v1.0 · Claude API</p>",
-                unsafe_allow_html=True)
+    st.markdown("<p style='color:#3A5A7A; font-size:0.75rem;'>PROCURA v1.0 · Claude API</p>", unsafe_allow_html=True)
 
 
 # ─── Main Tabs ───────────────────────────────────────────────────────────────
@@ -672,8 +656,7 @@ tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
 # TAB 1 — Market Comparison
 # ══════════════════════════════════════════════════════════════════════════════
 with tab1:
-    st.markdown('<div class="section-title">Equipment Selection</div>',
-                unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Equipment Selection</div>', unsafe_allow_html=True)
 
     col_eq, col_cond = st.columns([2, 1])
     with col_eq:
@@ -694,8 +677,7 @@ with tab1:
     equipment = EQUIPMENT_CATALOG[selected_equipment]
 
     # ── Specs Overview ────────────────────────────────────────────────────────
-    st.markdown('<div class="section-title">Specifications</div>',
-                unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Specifications</div>', unsafe_allow_html=True)
 
     spec_cols = st.columns(len(equipment["specs"]))
     for i, (spec_key, spec_val) in enumerate(equipment["specs"].items()):
@@ -708,11 +690,9 @@ with tab1:
             """, unsafe_allow_html=True)
 
     # ── Price Comparison Table ────────────────────────────────────────────────
-    st.markdown('<div class="section-title">Price Comparison Across Markets</div>',
-                unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Price Comparison Across Markets</div>', unsafe_allow_html=True)
 
-    condition_multiplier = {
-        "New": 1.0, "Used (Good)": 0.65, "Used (Fair)": 0.45, "Refurbished": 0.75}
+    condition_multiplier = {"New": 1.0, "Used (Good)": 0.65, "Used (Fair)": 0.45, "Refurbished": 0.75}
     mult = condition_multiplier[condition]
 
     rows = []
@@ -763,8 +743,7 @@ with tab1:
             </div>
             """, unsafe_allow_html=True)
         with m3:
-            pct = ((most_expensive - cheapest_price) /
-                   most_expensive * 100) if most_expensive else 0
+            pct = ((most_expensive - cheapest_price) / most_expensive * 100) if most_expensive else 0
             st.markdown(f"""
             <div class="metric-card">
                 <div class="label">Max Savings vs Priciest</div>
@@ -816,15 +795,14 @@ with tab1:
 
         # Table
         display_df = df_sorted[["Market", "Adjusted Price (USD)", "Typical Lead Time",
-                                "Import Duty (to NG)", "Key Platforms"]].copy()
+                                  "Import Duty (to NG)", "Key Platforms"]].copy()
         display_df["Adjusted Price (USD)"] = display_df["Adjusted Price (USD)"].apply(
             lambda x: f"${x:,.0f}"
         )
         st.dataframe(display_df, use_container_width=True, hide_index=True)
 
         # Price influence factors
-        st.markdown(
-            '<div class="section-title">What Drives These Price Differences?</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-title">What Drives These Price Differences?</div>', unsafe_allow_html=True)
         factors_col1, factors_col2 = st.columns(2)
         with factors_col1:
             st.markdown("""
@@ -861,8 +839,7 @@ with tab1:
                     procurement_country=procurement_country,
                     destination=destination_country
                 )
-            st.markdown(
-                f'<div class="ai-response">{analysis}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="ai-response">{analysis}</div>', unsafe_allow_html=True)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -916,8 +893,7 @@ with tab2:
         },
     }
 
-    st.markdown('<div class="section-title">Client Machine List</div>',
-                unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Client Machine List</div>', unsafe_allow_html=True)
     st.markdown(f"""<div class="info-box">
     🏢 <strong style="color:#F5A623;">Nigerian Infrastructure Client</strong> &nbsp;·&nbsp;
     Destination: {destination_country} &nbsp;·&nbsp; Market: European (EU)
@@ -928,20 +904,14 @@ with tab2:
     with st.expander("➕ Add Custom Machine to Search List"):
         cm1, cm2, cm3 = st.columns(3)
         with cm1:
-            cust_name = st.text_input(
-                "Machine Name", placeholder="e.g. Wheel Loader", key="cust_name")
-            cust_qty = st.number_input(
-                "Qty", min_value=1, value=1, key="cust_qty")
+            cust_name = st.text_input("Machine Name", placeholder="e.g. Wheel Loader", key="cust_name")
+            cust_qty = st.number_input("Qty", min_value=1, value=1, key="cust_qty")
         with cm2:
-            cust_specs = st.text_input(
-                "Key Specs", placeholder="e.g. 3t capacity, min 80HP", key="cust_specs")
-            cust_budget = st.number_input(
-                "Budget (USD)", min_value=0, value=50000, step=1000, key="cust_budget")
+            cust_specs = st.text_input("Key Specs", placeholder="e.g. 3t capacity, min 80HP", key="cust_specs")
+            cust_budget = st.number_input("Budget (USD)", min_value=0, value=50000, step=1000, key="cust_budget")
         with cm3:
-            cust_cond = st.selectbox("Condition", [
-                                     "New or Used", "New", "Used (Good)", "Used (Fair)"], key="cust_cond")
-            cust_notes = st.text_input(
-                "Notes", placeholder="Brand preferences etc.", key="cust_notes")
+            cust_cond = st.selectbox("Condition", ["New or Used", "New", "Used (Good)", "Used (Fair)"], key="cust_cond")
+            cust_notes = st.text_input("Notes", placeholder="Brand preferences etc.", key="cust_notes")
         if st.button("Add to Search List", key="add_cust_machine"):
             if cust_name.strip():
                 CLIENT_MACHINES[cust_name] = {
@@ -969,10 +939,8 @@ with tab2:
     has_selected = selected_machine in st.session_state.selected_machines
 
     # ── Machine card ──────────────────────────────────────────────────────────
-    status_color = "#4AE89E" if has_selected else (
-        "#F5A623" if sel_count > 0 else "#5A7A9A")
-    status_label = "SELECTED" if has_selected else (
-        f"{sel_count} SHORTLISTED" if sel_count > 0 else "NOT STARTED")
+    status_color = "#4AE89E" if has_selected else ("#F5A623" if sel_count > 0 else "#5A7A9A")
+    status_label = "SELECTED" if has_selected else (f"{sel_count} SHORTLISTED" if sel_count > 0 else "NOT STARTED")
     st.markdown(f"""
     <div class="metric-card" style="border-left:3px solid {status_color}; margin-bottom:1rem;">
       <div style="display:flex; justify-content:space-between; align-items:flex-start;">
@@ -991,12 +959,10 @@ with tab2:
     </div>""", unsafe_allow_html=True)
 
     # ── STEP 1: Search Links ──────────────────────────────────────────────────
-    st.markdown('<div class="section-title">Step 1 — Search EU Platforms</div>',
-                unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Step 1 — Search EU Platforms</div>', unsafe_allow_html=True)
 
-    q = selected_machine.lower().replace(" ", "+").replace("(", "").replace(")", "")
-    q_brand = mdata["notes"].split(
-        "/")[0].strip().lower().replace(" ", "+") if mdata["notes"] else ""
+    q = selected_machine.lower().replace(" ", "+").replace("(","").replace(")","")
+    q_brand = mdata["notes"].split("/")[0].strip().lower().replace(" ","+") if mdata["notes"] else ""
     budget_eur = int(mdata["budget_usd"] * 0.93)
 
     search_links = {
@@ -1011,8 +977,7 @@ with tab2:
     }
 
     link_cols = st.columns(4)
-    colors = ["#4A9EF5", "#4A9EF5", "#4AE89E", "#4AE89E",
-              "#E8A84A", "#E8A84A", "#A84AE8", "#E85F5F"]
+    colors = ["#4A9EF5","#4A9EF5","#4AE89E","#4AE89E","#E8A84A","#E8A84A","#A84AE8","#E85F5F"]
     for idx, (name, url) in enumerate(search_links.items()):
         with link_cols[idx % 4]:
             st.markdown(f"""<a href="{url}" target="_blank" style="
@@ -1033,33 +998,22 @@ with tab2:
     </div>""", unsafe_allow_html=True)
 
     # ── STEP 2: Shortlist ─────────────────────────────────────────────────────
-    st.markdown(
-        f'<div class="section-title">Step 2 — Shortlist Candidates ({sel_count} saved)</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="section-title">Step 2 — Shortlist Candidates ({sel_count} saved)</div>', unsafe_allow_html=True)
 
     with st.expander("➕ Add candidate to shortlist", expanded=(sel_count == 0)):
         sa, sb = st.columns(2)
         with sa:
-            sl_model = st.text_input(
-                "Model name", placeholder="e.g. CAT 320 GC", key=f"sl_model_{selected_machine}")
-            sl_year = st.text_input(
-                "Year", placeholder="e.g. 2020", key=f"sl_year_{selected_machine}")
-            sl_price = st.text_input(
-                "Price (with currency)", placeholder="e.g. €68,500", key=f"sl_price_{selected_machine}")
-            sl_hours = st.text_input(
-                "Hours (if used)", placeholder="e.g. 4,200h", key=f"sl_hours_{selected_machine}")
+            sl_model   = st.text_input("Model name", placeholder="e.g. CAT 320 GC", key=f"sl_model_{selected_machine}")
+            sl_year    = st.text_input("Year", placeholder="e.g. 2020", key=f"sl_year_{selected_machine}")
+            sl_price   = st.text_input("Price (with currency)", placeholder="e.g. €68,500", key=f"sl_price_{selected_machine}")
+            sl_hours   = st.text_input("Hours (if used)", placeholder="e.g. 4,200h", key=f"sl_hours_{selected_machine}")
         with sb:
-            sl_engine = st.text_input(
-                "Engine HP/kW", placeholder="e.g. 138HP / 103kW", key=f"sl_eng_{selected_machine}")
-            sl_weight = st.text_input(
-                "Operating weight", placeholder="e.g. 20,200 kg", key=f"sl_weight_{selected_machine}")
-            sl_seller = st.text_input(
-                "Seller name", placeholder="e.g. Zeppelin GmbH", key=f"sl_seller_{selected_machine}")
-            sl_location = st.text_input(
-                "Location", placeholder="e.g. Hamburg, Germany", key=f"sl_loc_{selected_machine}")
-        sl_platform = st.text_input(
-            "Platform / URL", placeholder="e.g. Mascus.de — paste URL here", key=f"sl_plat_{selected_machine}")
-        sl_notes = st.text_input(
-            "Extra notes", placeholder="e.g. Full service history, new undercarriage", key=f"sl_notes_{selected_machine}")
+            sl_engine  = st.text_input("Engine HP/kW", placeholder="e.g. 138HP / 103kW", key=f"sl_eng_{selected_machine}")
+            sl_weight  = st.text_input("Operating weight", placeholder="e.g. 20,200 kg", key=f"sl_weight_{selected_machine}")
+            sl_seller  = st.text_input("Seller name", placeholder="e.g. Zeppelin GmbH", key=f"sl_seller_{selected_machine}")
+            sl_location= st.text_input("Location", placeholder="e.g. Hamburg, Germany", key=f"sl_loc_{selected_machine}")
+        sl_platform = st.text_input("Platform / URL", placeholder="e.g. Mascus.de — paste URL here", key=f"sl_plat_{selected_machine}")
+        sl_notes    = st.text_input("Extra notes", placeholder="e.g. Full service history, new undercarriage", key=f"sl_notes_{selected_machine}")
 
         if st.button(f"Add to {selected_machine} Shortlist", key=f"sl_add_{selected_machine}"):
             if sl_model.strip():
@@ -1079,8 +1033,7 @@ with tab2:
     # Show shortlist cards
     if shortlist:
         for idx, cand in enumerate(shortlist):
-            is_selected = st.session_state.selected_machines.get(
-                selected_machine, {}).get("model") == cand["model"]
+            is_selected = st.session_state.selected_machines.get(selected_machine, {}).get("model") == cand["model"]
             card_color = "#4AE89E" if is_selected else "#2A3F5F"
             selected_badge = " ✅ SELECTED" if is_selected else ""
             c1, c2 = st.columns([5, 1])
@@ -1116,8 +1069,7 @@ with tab2:
 
     # ── STEP 3: AI Comparison ─────────────────────────────────────────────────
     if len(shortlist) >= 2:
-        st.markdown(
-            '<div class="section-title">Step 3 — Compare Shortlisted Candidates</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-title">Step 3 — Compare Shortlisted Candidates</div>', unsafe_allow_html=True)
 
         cand_labels = [f"{c['model']} ({c['price']})" for c in shortlist]
         compare_picks = st.multiselect(
@@ -1178,31 +1130,23 @@ Clear winner and why. What to verify with the seller before committing."""
                     model="claude-sonnet-4-20250514", max_tokens=2500,
                     messages=[{"role": "user", "content": prompt}],
                 )
-            st.markdown(
-                f'<div class="ai-response">{msg.content[0].text}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="ai-response">{msg.content[0].text}</div>', unsafe_allow_html=True)
 
     # ── STEP 4: Enquiry Generator ─────────────────────────────────────────────
     if shortlist:
-        st.markdown(
-            '<div class="section-title">Step 4 — Generate Seller Enquiry</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-title">Step 4 — Generate Seller Enquiry</div>', unsafe_allow_html=True)
 
-        cand_labels_eq = [
-            f"{c['model']} — {c['seller'] or 'Unknown seller'}" for c in shortlist]
-        enquiry_pick = st.selectbox(
-            "Generate enquiry for:", cand_labels_eq, key=f"eq_pick_{selected_machine}")
+        cand_labels_eq = [f"{c['model']} — {c['seller'] or 'Unknown seller'}" for c in shortlist]
+        enquiry_pick = st.selectbox("Generate enquiry for:", cand_labels_eq, key=f"eq_pick_{selected_machine}")
         enquiry_cand = shortlist[cand_labels_eq.index(enquiry_pick)]
 
         eq_col1, eq_col2 = st.columns(2)
         with eq_col1:
-            your_name = st.text_input(
-                "Your name", value="Sergio", key=f"eq_name_{selected_machine}")
-            your_company = st.text_input(
-                "Company name", value="PROCURA Global Procurement", key=f"eq_co_{selected_machine}")
+            your_name    = st.text_input("Your name", value="Sergio", key=f"eq_name_{selected_machine}")
+            your_company = st.text_input("Company name", value="PROCURA Global Procurement", key=f"eq_co_{selected_machine}")
         with eq_col2:
-            your_email = st.text_input(
-                "Your email", placeholder="sergio@procura.com", key=f"eq_email_{selected_machine}")
-            urgency = st.selectbox("Timeline", [
-                                   "Flexible", "Within 30 days", "Within 60 days", "Urgent — within 2 weeks"], key=f"eq_urg_{selected_machine}")
+            your_email   = st.text_input("Your email", placeholder="sergio@procura.com", key=f"eq_email_{selected_machine}")
+            urgency      = st.selectbox("Timeline", ["Flexible", "Within 30 days", "Within 60 days", "Urgent — within 2 weeks"], key=f"eq_urg_{selected_machine}")
 
         if st.button("✉️ Generate Email + Call Script", type="primary", key=f"eq_gen_{selected_machine}"):
             client = anthropic.Anthropic()
@@ -1250,44 +1194,35 @@ how to position the destination (Nigeria) positively, and how to close for next 
                     messages=[{"role": "user", "content": prompt}],
                 )
             result = msg.content[0].text
-            st.markdown(
-                f'<div class="ai-response">{result}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="ai-response">{result}</div>', unsafe_allow_html=True)
 
     # ── STEP 5: Push to Order Builder ─────────────────────────────────────────
     if st.session_state.selected_machines:
-        st.markdown(
-            '<div class="section-title">Step 5 — Push Selections to Order Builder</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-title">Step 5 — Push Selections to Order Builder</div>', unsafe_allow_html=True)
 
         sel_summary = []
         for mname, cand in st.session_state.selected_machines.items():
             qty = CLIENT_MACHINES.get(mname, {}).get("qty", 1)
-            sel_summary.append(
-                f"✅ **{mname}** x{qty} — {cand['model']} @ {cand['price']} ({cand['seller'] or '—'})")
+            sel_summary.append(f"✅ **{mname}** x{qty} — {cand['model']} @ {cand['price']} ({cand['seller'] or '—'})")
         st.markdown("\n".join(sel_summary))
 
         if st.button("📋 Push All Selections to Order Builder", type="primary", key="push_to_order"):
             for mname, cand in st.session_state.selected_machines.items():
                 qty = CLIENT_MACHINES.get(mname, {}).get("qty", 1)
                 # Parse price to USD (rough — strip currency symbols)
-                raw_price = cand["price"].replace("€", "").replace("£", "").replace(
-                    "$", "").replace(",", "").replace("AED", "").strip()
+                raw_price = cand["price"].replace("€","").replace("£","").replace("$","").replace(",","").replace("AED","").strip()
                 try:
                     price_num = float(raw_price.split()[0])
                     # Convert EUR/GBP to USD roughly
-                    if "€" in cand["price"]:
-                        price_num = price_num / 0.93
-                    elif "£" in cand["price"]:
-                        price_num = price_num / 0.79
-                    elif "AED" in cand["price"]:
-                        price_num = price_num / 3.67
-                except:
-                    price_num = 0
+                    if "€" in cand["price"]: price_num = price_num / 0.93
+                    elif "£" in cand["price"]: price_num = price_num / 0.79
+                    elif "AED" in cand["price"]: price_num = price_num / 3.67
+                except: price_num = 0
 
                 # Update or add to order_items
                 if "order_items" not in st.session_state:
                     st.session_state.order_items = []
-                existing = next(
-                    (x for x in st.session_state.order_items if x["item"] == mname), None)
+                existing = next((x for x in st.session_state.order_items if x["item"] == mname), None)
                 if existing:
                     existing["eu_price"] = int(price_num)
                     existing["locked_market"] = "EU"
@@ -1299,20 +1234,17 @@ how to position the destination (Nigeria) positively, and how to close for next 
                         "locked_market": "EU",
                         "notes": f"{cand['model']} — {cand['seller'] or ''}"
                     })
-            st.success(
-                f"Pushed {len(st.session_state.selected_machines)} selections to Order Builder (Tab 6)")
+            st.success(f"Pushed {len(st.session_state.selected_machines)} selections to Order Builder (Tab 6)")
             st.rerun()
 
     # ── Progress overview ─────────────────────────────────────────────────────
-    st.markdown('<div class="section-title">Overall Progress</div>',
-                unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Overall Progress</div>', unsafe_allow_html=True)
     prog_cols = st.columns(len(CLIENT_MACHINES))
     for idx, (mname, minfo) in enumerate(CLIENT_MACHINES.items()):
         sl = st.session_state.shortlists.get(mname, [])
         is_sel = mname in st.session_state.selected_machines
         color = "#4AE89E" if is_sel else ("#F5A623" if sl else "#2A3F5F")
-        status = "Selected" if is_sel else (
-            f"{len(sl)} candidates" if sl else "Not started")
+        status = "Selected" if is_sel else (f"{len(sl)} candidates" if sl else "Not started")
         with prog_cols[idx]:
             st.markdown(f"""<div class="metric-card" style="border-top:3px solid {color}; text-align:center; padding:0.8rem;">
             <div style="font-size:0.7rem; color:{color}; font-weight:600;">{status.upper()}</div>
@@ -1323,9 +1255,9 @@ how to position the destination (Nigeria) positively, and how to close for next 
 
 with tab3:
 
+
     # ── PART A: Search Launcher ───────────────────────────────────────────────
-    st.markdown('<div class="section-title">Part A — Search Launcher</div>',
-                unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Part A — Search Launcher</div>', unsafe_allow_html=True)
     st.markdown("""
     <div class="info-box">
     🔗 <strong style="color:#F5A623;">Smart Deep Links</strong> — Define your specs below and we'll
@@ -1340,20 +1272,14 @@ with tab3:
             "Wheel Loader", "Backhoe Loader", "Road Roller", "Crane", "Forklift",
             "Concrete Mixer Truck", "Truck Tractor", "Tipper Truck", "Generator"
         ], key="la_machine")
-        la_condition = st.selectbox(
-            "Condition", ["Any", "New", "Used"], key="la_cond")
-        la_budget = st.text_input(
-            "Max Budget (USD)", placeholder="e.g. 80000", key="la_budget")
+        la_condition = st.selectbox("Condition", ["Any", "New", "Used"], key="la_cond")
+        la_budget = st.text_input("Max Budget (USD)", placeholder="e.g. 80000", key="la_budget")
 
     with la_col2:
-        la_year_min = st.text_input(
-            "Year from", placeholder="e.g. 2018", key="la_yr_min")
-        la_year_max = st.text_input(
-            "Year to", placeholder="e.g. 2023", key="la_yr_max")
-        la_hp = st.text_input(
-            "Min Engine HP", placeholder="e.g. 120", key="la_hp")
-        la_brand = st.text_input("Preferred Brand (optional)",
-                                 placeholder="e.g. CAT, Komatsu, XCMG", key="la_brand")
+        la_year_min = st.text_input("Year from", placeholder="e.g. 2018", key="la_yr_min")
+        la_year_max = st.text_input("Year to", placeholder="e.g. 2023", key="la_yr_max")
+        la_hp = st.text_input("Min Engine HP", placeholder="e.g. 120", key="la_hp")
+        la_brand = st.text_input("Preferred Brand (optional)", placeholder="e.g. CAT, Komatsu, XCMG", key="la_brand")
 
     if st.button("🔗 Generate Search Links", key="gen_links"):
         q_machine = la_machine.lower().replace(" ", "+")
@@ -1374,18 +1300,11 @@ with tab3:
         }
 
         filters_applied = []
-        if la_condition != "Any":
-            filters_applied.append(f"Condition: {la_condition}")
-        if la_year_min or la_year_max:
-            filters_applied.append(
-                f"Year: {la_year_min or '?'}–{la_year_max or '?'}")
-        if la_budget:
-            filters_applied.append(
-                f"Max budget: ${int(la_budget):,}" if la_budget.isdigit() else f"Max: ${la_budget}")
-        if la_hp:
-            filters_applied.append(f"Min HP: {la_hp}")
-        filters_str = " · ".join(
-            filters_applied) if filters_applied else "No additional filters"
+        if la_condition != "Any": filters_applied.append(f"Condition: {la_condition}")
+        if la_year_min or la_year_max: filters_applied.append(f"Year: {la_year_min or '?'}–{la_year_max or '?'}")
+        if la_budget: filters_applied.append(f"Max budget: ${int(la_budget):,}" if la_budget.isdigit() else f"Max: ${la_budget}")
+        if la_hp: filters_applied.append(f"Min HP: {la_hp}")
+        filters_str = " · ".join(filters_applied) if filters_applied else "No additional filters"
 
         st.markdown(f"""<div class="info-box" style="margin-bottom:1rem;">
         <strong style="color:#F5A623;">Search: {la_machine}</strong> &nbsp;·&nbsp; {filters_str}<br>
@@ -1394,8 +1313,7 @@ with tab3:
 
         link_cols = st.columns(3)
         link_items = list(links.items())
-        market_colors = ["#4A9EF5", "#E85F5F", "#E85F5F", "#4AE89E",
-                         "#F5A623", "#F5A623", "#E8A84A", "#4AE89E", "#4A9EF5"]
+        market_colors = ["#4A9EF5","#E85F5F","#E85F5F","#4AE89E","#F5A623","#F5A623","#E8A84A","#4AE89E","#4A9EF5"]
         for i, (name, url) in enumerate(link_items):
             with link_cols[i % 3]:
                 color = market_colors[i % len(market_colors)]
@@ -1418,8 +1336,7 @@ with tab3:
     st.markdown("<br>", unsafe_allow_html=True)
 
     # ── PART B: Listing Comparator ────────────────────────────────────────────
-    st.markdown('<div class="section-title">Part B — Paste Listings for AI Comparison</div>',
-                unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Part B — Paste Listings for AI Comparison</div>', unsafe_allow_html=True)
     st.markdown("""
     <div class="info-box" style="border-left:3px solid #E8A84A;">
     ⚠️ <strong style="color:#E8A84A;">Accuracy depends on what you paste</strong><br>
@@ -1478,8 +1395,7 @@ with tab3:
         elif not cmp_machine.strip():
             st.warning("Please describe what machine you are comparing.")
         elif any(len(l.strip()) < 50 for l in listings):
-            st.warning(
-                "One or more listings look too short. Please paste the full spec details from the listing page — not just a URL — for accurate results.")
+            st.warning("One or more listings look too short. Please paste the full spec details from the listing page — not just a URL — for accurate results.")
         else:
             client = anthropic.Anthropic()
             listings_block = ""
@@ -1555,8 +1471,7 @@ Never invent numbers. If you cannot compare something fairly, say so."""
                 )
             result = message.content[0].text
             st.markdown("### 📋 AI Comparison Report")
-            st.markdown(
-                f'<div class="ai-response">{result}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="ai-response">{result}</div>', unsafe_allow_html=True)
             st.markdown("---")
             st.markdown("""
             <div class="info-box">
@@ -1569,8 +1484,7 @@ Never invent numbers. If you cannot compare something fairly, say so."""
 # TAB 3 — Shipping & Logistics AI
 # ══════════════════════════════════════════════════════════════════════════════
 with tab4:
-    st.markdown('<div class="section-title">AI-Powered Shipping & Customs Advisory</div>',
-                unsafe_allow_html=True)
+    st.markdown('<div class="section-title">AI-Powered Shipping & Customs Advisory</div>', unsafe_allow_html=True)
 
     sh_col1, sh_col2 = st.columns([1, 1])
     with sh_col1:
@@ -1585,8 +1499,7 @@ with tab4:
             default=["Excavator", "Motor Grader", "Bulldozer (Dozer)"],
         )
         include_tyres = st.checkbox("Include 10x Truck Tyres", value=True)
-        tyre_condition_ship = st.radio(
-            "Tyre Condition", ["New", "Used", "Mix (5 New + 5 Used)"], horizontal=True)
+        tyre_condition_ship = st.radio("Tyre Condition", ["New", "Used", "Mix (5 New + 5 Used)"], horizontal=True)
 
     with sh_col2:
         ship_destination = st.selectbox(
@@ -1597,8 +1510,7 @@ with tab4:
         )
         buyer_residency = st.selectbox(
             "Buyer/Agent Residency",
-            ["Germany 🇩🇪 (EU Resident)", "UK 🇬🇧", "UAE 🇦🇪",
-             "Not resident in source country"],
+            ["Germany 🇩🇪 (EU Resident)", "UK 🇬🇧", "UAE 🇦🇪", "Not resident in source country"],
         )
         shipment_method = st.selectbox(
             "Preferred Shipment Method",
@@ -1608,8 +1520,7 @@ with tab4:
 
     # Auto-populate from order builder if items exist
     if "order_items" in st.session_state and st.session_state.order_items:
-        locked_items = [
-            r for r in st.session_state.order_items if r["locked_market"] != "TBD"]
+        locked_items = [r for r in st.session_state.order_items if r["locked_market"] != "TBD"]
         all_items = st.session_state.order_items
         auto_equipment = list(set([r["item"] for r in all_items]))
         auto_note = ""
@@ -1650,8 +1561,7 @@ with tab4:
             )
 
         st.markdown("### 📋 Shipping & Customs Advisory Report")
-        st.markdown(
-            f'<div class="ai-response">{advice}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="ai-response">{advice}</div>', unsafe_allow_html=True)
 
         st.markdown("---")
         st.info("💡 **Disclaimer**: This advisory is AI-generated for guidance purposes. Always verify duties and customs requirements with a licensed freight forwarder or customs broker before finalising procurement.")
@@ -1703,8 +1613,7 @@ with tab4:
 # ══════════════════════════════════════════════════════════════════════════════
 with tab5:
 
-    st.markdown('<div class="section-title">Procurement Order Builder</div>',
-                unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Procurement Order Builder</div>', unsafe_allow_html=True)
     st.markdown("""
     <div class="info-box">
     📋 <strong style="color:#F5A623;">Dynamic Order Builder</strong> — Add machines you have sourced
@@ -1715,40 +1624,27 @@ with tab5:
     # ── Session state for dynamic rows ───────────────────────────────────────
     if "order_items" not in st.session_state:
         st.session_state.order_items = [
-            {"item": "Excavator",        "qty": 1, "eu_price": 95000,  "cn_price": 38000,
-                "uae_price": 65000, "locked_market": "TBD", "notes": "CAT 320 / XCMG equiv."},
-            {"item": "Motor Grader",     "qty": 1, "eu_price": 120000, "cn_price": 55000,
-                "uae_price": 85000, "locked_market": "TBD", "notes": "SDLG G9180 equiv."},
-            {"item": "Bulldozer (Dozer)", "qty": 1, "eu_price": 85000,  "cn_price": 35000,
-             "uae_price": 60000, "locked_market": "TBD", "notes": "CAT D6 equiv."},
-            {"item": "Dump Truck",       "qty": 2, "eu_price": 38000,  "cn_price": 18000,
-                "uae_price": 28000, "locked_market": "TBD", "notes": "10-15t payload"},
-            {"item": "Water Tanker Truck", "qty": 1, "eu_price": 45000, "cn_price": 22000,
-                "uae_price": 33000, "locked_market": "TBD", "notes": "10,000L+ capacity"},
-            {"item": "Truck Tyres (x5 New)", "qty": 5, "eu_price": 350, "cn_price": 120,
-             "uae_price": 220,   "locked_market": "TBD", "notes": "22.5 rim, 11R22.5"},
-            {"item": "Truck Tyres (x5 Used)", "qty": 5, "eu_price": 120, "cn_price": 45,
-             "uae_price": 85,    "locked_market": "TBD", "notes": "Min 60% tread depth"},
+            {"item": "Excavator",        "qty": 1, "eu_price": 95000,  "cn_price": 38000, "uae_price": 65000, "locked_market": "TBD", "notes": "CAT 320 / XCMG equiv."},
+            {"item": "Motor Grader",     "qty": 1, "eu_price": 120000, "cn_price": 55000, "uae_price": 85000, "locked_market": "TBD", "notes": "SDLG G9180 equiv."},
+            {"item": "Bulldozer (Dozer)","qty": 1, "eu_price": 85000,  "cn_price": 35000, "uae_price": 60000, "locked_market": "TBD", "notes": "CAT D6 equiv."},
+            {"item": "Dump Truck",       "qty": 2, "eu_price": 38000,  "cn_price": 18000, "uae_price": 28000, "locked_market": "TBD", "notes": "10-15t payload"},
+            {"item": "Water Tanker Truck","qty": 1, "eu_price": 45000, "cn_price": 22000, "uae_price": 33000, "locked_market": "TBD", "notes": "10,000L+ capacity"},
+            {"item": "Truck Tyres (x5 New)","qty": 5,"eu_price": 350, "cn_price": 120,   "uae_price": 220,   "locked_market": "TBD", "notes": "22.5 rim, 11R22.5"},
+            {"item": "Truck Tyres (x5 Used)","qty": 5,"eu_price": 120, "cn_price": 45,   "uae_price": 85,    "locked_market": "TBD", "notes": "Min 60% tread depth"},
         ]
 
     # ── Add new item form ─────────────────────────────────────────────────────
     with st.expander("➕ Add New Item to Order"):
         na, nb, nc = st.columns(3)
         with na:
-            new_item_name = st.text_input(
-                "Machine / Item", placeholder="e.g. Wheel Loader", key="ni_name")
-            new_item_qty = st.number_input(
-                "Qty", min_value=1, value=1, key="ni_qty")
+            new_item_name = st.text_input("Machine / Item", placeholder="e.g. Wheel Loader", key="ni_name")
+            new_item_qty  = st.number_input("Qty", min_value=1, value=1, key="ni_qty")
         with nb:
-            new_eu_price = st.number_input(
-                "EU Price (USD)", min_value=0, value=0, step=500, key="ni_eu")
-            new_cn_price = st.number_input(
-                "CN Price (USD)", min_value=0, value=0, step=500, key="ni_cn")
+            new_eu_price  = st.number_input("EU Price (USD)", min_value=0, value=0, step=500, key="ni_eu")
+            new_cn_price  = st.number_input("CN Price (USD)", min_value=0, value=0, step=500, key="ni_cn")
         with nc:
-            new_uae_price = st.number_input(
-                "UAE Price (USD)", min_value=0, value=0, step=500, key="ni_uae")
-            new_notes = st.text_input(
-                "Notes / Specs", placeholder="e.g. 3t capacity, CE cert", key="ni_notes")
+            new_uae_price = st.number_input("UAE Price (USD)", min_value=0, value=0, step=500, key="ni_uae")
+            new_notes     = st.text_input("Notes / Specs", placeholder="e.g. 3t capacity, CE cert", key="ni_notes")
 
         if st.button("Add to Order", key="add_item_btn"):
             if new_item_name.strip():
@@ -1762,37 +1658,23 @@ with tab5:
                 st.rerun()
 
     # ── Editable order table ──────────────────────────────────────────────────
-    st.markdown('<div class="section-title">Current Order</div>',
-                unsafe_allow_html=True)
-    st.caption(
-        f"All prices in {curr['code']}. Edit EU/CN/UAE prices directly to reflect your actual sourced quotes.")
+    st.markdown('<div class="section-title">Current Order</div>', unsafe_allow_html=True)
+    st.caption(f"All prices in {curr['code']}. Edit EU/CN/UAE prices directly to reflect your actual sourced quotes.")
 
     items = st.session_state.order_items
     rows_to_delete = []
 
     for i, row in enumerate(items):
-        rc1, rc2, rc3, rc4, rc5, rc6, rc7 = st.columns(
-            [2.5, 0.6, 1.2, 1.2, 1.2, 1.8, 0.4])
-        with rc1:
-            st.markdown(
-                f"<div style='padding:0.6rem 0; color:#C0D0E0; font-size:0.88rem;'>{row['item']}</div>", unsafe_allow_html=True)
-        with rc2:
-            st.markdown(
-                f"<div style='padding:0.6rem 0; color:#8A9BB5; font-size:0.88rem; text-align:center;'>x{row['qty']}</div>", unsafe_allow_html=True)
-        with rc3:
-            st.markdown(
-                f"<div style='padding:0.6rem 0; color:#4A9EF5; font-size:0.85rem;'>{fmt(row['eu_price'], selected_currency)}</div>", unsafe_allow_html=True)
-        with rc4:
-            st.markdown(
-                f"<div style='padding:0.6rem 0; color:#E85F5F; font-size:0.85rem;'>{fmt(row['cn_price'], selected_currency)}</div>", unsafe_allow_html=True)
-        with rc5:
-            st.markdown(
-                f"<div style='padding:0.6rem 0; color:#E8A84A; font-size:0.85rem;'>{fmt(row['uae_price'], selected_currency)}</div>", unsafe_allow_html=True)
+        rc1, rc2, rc3, rc4, rc5, rc6, rc7 = st.columns([2.5, 0.6, 1.2, 1.2, 1.2, 1.8, 0.4])
+        with rc1: st.markdown(f"<div style='padding:0.6rem 0; color:#C0D0E0; font-size:0.88rem;'>{row['item']}</div>", unsafe_allow_html=True)
+        with rc2: st.markdown(f"<div style='padding:0.6rem 0; color:#8A9BB5; font-size:0.88rem; text-align:center;'>x{row['qty']}</div>", unsafe_allow_html=True)
+        with rc3: st.markdown(f"<div style='padding:0.6rem 0; color:#4A9EF5; font-size:0.85rem;'>{fmt(row['eu_price'], selected_currency)}</div>", unsafe_allow_html=True)
+        with rc4: st.markdown(f"<div style='padding:0.6rem 0; color:#E85F5F; font-size:0.85rem;'>{fmt(row['cn_price'], selected_currency)}</div>", unsafe_allow_html=True)
+        with rc5: st.markdown(f"<div style='padding:0.6rem 0; color:#E8A84A; font-size:0.85rem;'>{fmt(row['uae_price'], selected_currency)}</div>", unsafe_allow_html=True)
         with rc6:
-            locked = st.selectbox("Market", ["TBD", "EU", "CN (Alibaba)", "UAE", "UK", "US"],
-                                  index=["TBD", "EU", "CN (Alibaba)", "UAE", "UK", "US"].index(
-                                      row.get("locked_market", "TBD")),
-                                  key=f"mkt_{i}", label_visibility="collapsed")
+            locked = st.selectbox("Market", ["TBD","EU","CN (Alibaba)","UAE","UK","US"],
+                index=["TBD","EU","CN (Alibaba)","UAE","UK","US"].index(row.get("locked_market","TBD")),
+                key=f"mkt_{i}", label_visibility="collapsed")
             st.session_state.order_items[i]["locked_market"] = locked
         with rc7:
             if st.button("✕", key=f"del_{i}"):
@@ -1804,19 +1686,16 @@ with tab5:
         st.rerun()
 
     # ── Totals ────────────────────────────────────────────────────────────────
-    st.markdown('<div class="section-title">Order Totals</div>',
-                unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Order Totals</div>', unsafe_allow_html=True)
 
-    eu_total = sum(r["eu_price"] * r["qty"] for r in items)
-    cn_total = sum(r["cn_price"] * r["qty"] for r in items)
+    eu_total  = sum(r["eu_price"]  * r["qty"] for r in items)
+    cn_total  = sum(r["cn_price"]  * r["qty"] for r in items)
     uae_total = sum(r["uae_price"] * r["qty"] for r in items)
 
     # Locked market total — use the market each item is locked to
-    market_map = {"EU": "eu_price",
-                  "CN (Alibaba)": "cn_price", "UAE": "uae_price"}
+    market_map = {"EU": "eu_price", "CN (Alibaba)": "cn_price", "UAE": "uae_price"}
     locked_total = sum(
-        r.get(market_map.get(r["locked_market"],
-              "eu_price"), r["eu_price"]) * r["qty"]
+        r.get(market_map.get(r["locked_market"], "eu_price"), r["eu_price"]) * r["qty"]
         for r in items
     )
     best_saving = eu_total - cn_total
@@ -1852,12 +1731,10 @@ with tab5:
     </div>""", unsafe_allow_html=True)
 
     # ── Pie chart ─────────────────────────────────────────────────────────────
-    st.markdown('<div class="section-title">Cost Breakdown (EU Pricing)</div>',
-                unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Cost Breakdown (EU Pricing)</div>', unsafe_allow_html=True)
     pie_labels = [r["item"] for r in items]
     pie_values = [r["eu_price"] * r["qty"] for r in items]
-    colors = ["#4A9EF5", "#E85F5F", "#4AE89E", "#E8A84A",
-              "#A84AE8", "#F5A623", "#5A7A9A", "#E85F9F", "#4AE8D0"]
+    colors = ["#4A9EF5","#E85F5F","#4AE89E","#E8A84A","#A84AE8","#F5A623","#5A7A9A","#E85F9F","#4AE8D0"]
     fig3 = go.Figure(data=[go.Pie(
         labels=pie_labels, values=pie_values, hole=0.4,
         marker_colors=colors[:len(pie_labels)],
@@ -1872,8 +1749,7 @@ with tab5:
     st.plotly_chart(fig3, use_container_width=True)
 
     # ── AI Total Cost Report ──────────────────────────────────────────────────
-    st.markdown('<div class="section-title">AI Total Procurement & Shipping Cost Report</div>',
-                unsafe_allow_html=True)
+    st.markdown('<div class="section-title">AI Total Procurement & Shipping Cost Report</div>', unsafe_allow_html=True)
 
     order_summary = "\n".join([
         f"- {r['item']} x{r['qty']}: EU ${r['eu_price']:,} | CN ${r['cn_price']:,} | UAE ${r['uae_price']:,} | Selected: {r['locked_market']} | {r['notes']}"
@@ -1941,8 +1817,7 @@ Use {curr["code"]} for all monetary figures where possible (1 USD = {curr["rate"
                 messages=[{"role": "user", "content": prompt}],
             )
         result = message.content[0].text
-        st.markdown(
-            f'<div class="ai-response">{result}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="ai-response">{result}</div>', unsafe_allow_html=True)
         st.markdown("---")
         st.info("💡 Verify all duty rates and freight costs with a licensed customs broker and freight forwarder before finalising.")
 
@@ -1977,8 +1852,7 @@ with tab6:
 
     # Suggested starter questions
     if not st.session_state.chat_history:
-        st.markdown(
-            '<div class="section-title">Start the Consultation</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-title">Start the Consultation</div>', unsafe_allow_html=True)
         st.markdown("""<div class="info-box">
         👋 <strong style="color:#F5A623;">Hi, I\'m Marcus.</strong> I\'ll be your procurement consultant
         for this Nigerian road construction project. I\'ll guide you on exactly what machines you need,
@@ -2001,14 +1875,12 @@ with tab6:
         for i, q in enumerate(starter_qs):
             with sq_cols[i % 2]:
                 if st.button(q, key=f"starter_{i}", use_container_width=True):
-                    st.session_state.chat_history.append(
-                        {"role": "user", "content": q})
+                    st.session_state.chat_history.append({"role": "user", "content": q})
                     st.rerun()
 
     # Chat history display
     if st.session_state.chat_history:
-        st.markdown('<div class="section-title">Consultation</div>',
-                    unsafe_allow_html=True)
+        st.markdown('<div class="section-title">Consultation</div>', unsafe_allow_html=True)
         for msg in st.session_state.chat_history:
             if msg["role"] == "user":
                 st.markdown(f"""
@@ -2046,8 +1918,7 @@ with tab6:
                     messages=messages_payload,
                 )
                 reply = response.content[0].text
-                st.session_state.chat_history.append(
-                    {"role": "assistant", "content": reply})
+                st.session_state.chat_history.append({"role": "assistant", "content": reply})
                 st.rerun()
 
     # Input area
@@ -2064,8 +1935,7 @@ with tab6:
         send = st.button("Send ➤", use_container_width=True, key="chat_send")
 
     if send and user_input.strip():
-        st.session_state.chat_history.append(
-            {"role": "user", "content": user_input.strip()})
+        st.session_state.chat_history.append({"role": "user", "content": user_input.strip()})
         st.rerun()
 
     # Quick follow-up suggestions (shown after conversation starts)
@@ -2079,14 +1949,12 @@ with tab6:
             "What documentation do I need to import this equipment?",
             "What could go wrong with cheap Chinese machines?",
         ]
-        st.markdown(
-            "<p style='font-size:0.75rem; color:#4A6A8A; margin-bottom:0.4rem;'>Quick questions:</p>", unsafe_allow_html=True)
+        st.markdown("<p style='font-size:0.75rem; color:#4A6A8A; margin-bottom:0.4rem;'>Quick questions:</p>", unsafe_allow_html=True)
         fq_cols = st.columns(3)
         for i, fq in enumerate(follow_ups):
             with fq_cols[i % 3]:
                 if st.button(fq, key=f"fq_{i}", use_container_width=True):
-                    st.session_state.chat_history.append(
-                        {"role": "user", "content": fq})
+                    st.session_state.chat_history.append({"role": "user", "content": fq})
                     st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
